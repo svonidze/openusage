@@ -284,6 +284,14 @@ func computeDisplayInfoRaw(snap core.UsageSnapshot, widget core.DashboardWidget,
 				info.gaugePercent = *sd.Used
 			}
 		}
+		// Providers with monthly quota pools (e.g. Kimi Code) surface the
+		// monthly constraint next to the 5h one.
+		if mo, ok2 := snap.Metrics["usage_monthly"]; ok2 && mo.Used != nil {
+			parts = append(parts, fmt.Sprintf("mo %.0f%%", *mo.Used))
+			if *mo.Used > info.gaugePercent {
+				info.gaugePercent = *mo.Used
+			}
+		}
 		info.summary = strings.Join(parts, " · ")
 
 		var detailParts []string

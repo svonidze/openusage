@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -16,11 +15,13 @@ import (
 )
 
 // Quota support: Kimi Code CLI stores OAuth credentials in
-// ~/.kimi-code/credentials/<env>.json and the coding API exposes
-// GET {base}/usages with subscription quota windows (5h and monthly pools)
-// plus request-rate limits. The mapping mirrors claude_code's
-// usage_five_hour conventions so gauges, reset chips and the hero summary
-// render the same way.
+// ~/.kimi-code/credentials/<env>.json; the coding API exposes
+// GET {base}/usages with subscription quota windows (5h and monthly pools).
+// The mapping mirrors claude_code's usage_five_hour conventions so gauges,
+// reset chips and the hero summary render the same way. The transient
+// request-rate limits in the response are ignored on purpose: they are
+// throttling state, not subscription quota, and would hijack the hero
+// summary via the generic rate-limit display branch.
 
 const (
 	defaultUsageAPIBaseURL = "https://api.kimi.com/coding/v1"
@@ -335,52 +336,6 @@ func applyQuotaToSnapshot(snap *core.UsageSnapshot, usage *kimiUsagesResponse, n
 	if w, ok := usage.Usages["limit_month_code"]; ok {
 		setPct("usage_monthly_code", "30d", w)
 	}
-
-	rateKeys := []string{"rate_limit_primary", "rate_limit_secondary", "rate_limit_tertiary"}
-	for i, l := range usage.Limits {
-		if i >= len(rateKeys) {
-			break
-		}
-		used, errU := strconv.ParseFloat(l.Detail.Used, 64)
-		limit, errL := strconv.ParseFloat(l.Detail.Limit, 64)
-		remaining, errR := strconv.ParseFloat(l.Detail.Remaining, 64)
-		if errU != nil || errL != nil || limit <= 0 {
-			continue
-		}
-		if errR != nil {
-			remaining = limit - used
-		}
-		key := rateKeys[i]
-		snap.Metrics[key] = core.Metric{
-			Used:      &used,
-			Limit:     &limit,
-			Remaining: &remaining,
-			Unit:      "requests",
-			Window:    rateWindowLabel(l.Window.Duration, l.Window.TimeUnit),
-		}
-		if t, ok := parseResetTime(l.Detail.ResetTime); ok {
-			snap.Resets[key] = t
-		}
-	}
-}
-
-// rateWindowLabel maps a rate-limit window onto the short window tags the
-// dashboard recognises ("5h", "1d", "7d", "30d"); unknown windows yield "".
-func rateWindowLabel(duration int, timeUnit string) string {
-	if timeUnit != "TIME_UNIT_MINUTE" {
-		return ""
-	}
-	switch {
-	case duration == 300:
-		return "5h"
-	case duration == 1440:
-		return "1d"
-	case duration == 10080:
-		return "7d"
-	case duration == 43200:
-		return "30d"
-	}
-	return ""
 }
 
 func parseResetTime(raw string) (time.Time, bool) {

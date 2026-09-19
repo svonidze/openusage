@@ -12,12 +12,12 @@ func dashboardWidget() core.DashboardWidget {
 		// feed gauges like other coding tools. When no credentials are
 		// configured none of these keys exist, so no gauge area renders.
 		providerbase.WithGaugePriority(
-			"usage_five_hour", "usage_monthly", "usage_monthly_code", "rate_limit_primary",
+			"usage_five_hour", "usage_monthly", "usage_monthly_code",
 		),
 		providerbase.WithCompactRows(
 			core.DashboardCompactRow{
 				Label:       "Usage",
-				Keys:        []string{"usage_five_hour", "usage_monthly", "usage_monthly_code", "rate_limit_primary"},
+				Keys:        []string{"usage_five_hour", "usage_monthly", "usage_monthly_code"},
 				MaxSegments: 4,
 			},
 			core.DashboardCompactRow{
@@ -55,7 +55,6 @@ func dashboardWidget() core.DashboardWidget {
 			"usage_five_hour":     "5-Hour Usage",
 			"usage_monthly":       "Monthly Usage",
 			"usage_monthly_code":  "Monthly Code Usage",
-			"rate_limit_primary":  "Rate Limit",
 			// The hero summary falls back to the alphabetically first
 			// valued metric — in windowed views that is
 			// provider_kimi_cli_input_tokens; give it a readable label.
@@ -78,7 +77,6 @@ func dashboardWidget() core.DashboardWidget {
 			"usage_five_hour":                 "5h",
 			"usage_monthly":                   "mo",
 			"usage_monthly_code":              "mo code",
-			"rate_limit_primary":              "rate",
 		}),
 	)
 }

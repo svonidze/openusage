@@ -111,12 +111,8 @@ func TestFetch_QuotaHappyPath(t *testing.T) {
 		t.Errorf("usage_monthly window = %q, want 30d", monthly.Window)
 	}
 
-	rate := snap.Metrics["rate_limit_primary"]
-	if rate.Used == nil || *rate.Used != 46 || rate.Limit == nil || *rate.Limit != 100 {
-		t.Errorf("rate_limit_primary = used %v limit %v, want 46/100", rate.Used, rate.Limit)
-	}
-	if rate.Window != "5h" {
-		t.Errorf("rate_limit_primary window = %q, want 5h", rate.Window)
+	if _, ok := snap.Metrics["rate_limit_primary"]; ok {
+		t.Error("rate-limit windows are throttling state, not quota: must not be emitted")
 	}
 }
 
