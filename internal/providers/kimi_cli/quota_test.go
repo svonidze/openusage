@@ -120,7 +120,7 @@ func TestFetch_QuotaRefreshesExpiredToken(t *testing.T) {
 	var sawRefresh bool
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/oauth/token":
+		case "/api/oauth/token":
 			if err := r.ParseForm(); err != nil {
 				t.Errorf("ParseForm: %v", err)
 			}

@@ -148,7 +148,7 @@ func refreshCredentials(ctx context.Context, client *http.Client, oauthHost, pat
 		"refresh_token": {creds.RefreshToken},
 		"client_id":     {kimiOAuthClientID},
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, oauthHost+"/oauth/token", strings.NewReader(form.Encode()))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, oauthHost+"/api/oauth/token", strings.NewReader(form.Encode()))
 	if err != nil {
 		return creds, err
 	}
